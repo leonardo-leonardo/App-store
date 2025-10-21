@@ -129,7 +129,7 @@ else:
 
 st.markdown("---")
 
-# --- DISPLAY ITEMS AS LIST USING FORMS (FIXES FIRST BUTTON ISSUE) ---
+# --- DISPLAY ITEMS AS LIST USING FORMS (NO RERUN NEEDED) ---
 st.subheader("🛍️ Browse Items")
 for idx, item in enumerate(filtered_items):
     with st.form(key=f"form_{idx}"):
@@ -139,5 +139,5 @@ for idx, item in enumerate(filtered_items):
         submitted = st.form_submit_button("Add to Cart")
         if submitted:
             add_to_cart(item["name"])
-            st.experimental_rerun()  # refresh page to update cart
+            st.success(f"🛒 Added '{item['name']}' to cart!")
         st.markdown("---")
