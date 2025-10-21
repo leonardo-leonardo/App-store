@@ -69,21 +69,22 @@ while len(common_items) < 100:
         "description": description
     })
 
-# --- CART ---
+# --- INITIALIZE CART ---
 if "cart" not in st.session_state:
     st.session_state.cart = {}
 
-def add_to_cart(name):
-    if name in st.session_state.cart:
-        st.session_state.cart[name]["qty"] += 1
+# --- CART FUNCTIONS ---
+def add_to_cart(item_name):
+    if item_name in st.session_state.cart:
+        st.session_state.cart[item_name]["qty"] += 1
     else:
-        item = next((i for i in common_items if i["name"] == name), None)
+        item = next((i for i in common_items if i["name"] == item_name), None)
         if item:
-            st.session_state.cart[name] = {"item": item, "qty": 1}
+            st.session_state.cart[item_name] = {"item": item, "qty": 1}
 
-def remove_from_cart(name):
-    if name in st.session_state.cart:
-        del st.session_state.cart[name]
+def remove_from_cart(item_name):
+    if item_name in st.session_state.cart:
+        del st.session_state.cart[item_name]
 
 def checkout():
     if st.session_state.cart:
@@ -109,9 +110,9 @@ if st.session_state.cart:
     total_price = sum(v["item"]["price"] * v["qty"] for v in st.session_state.cart.values())
     st.write(f"Items in cart: **{total_qty}**  |  Total: **${total_price:.2f}**")
     with st.expander("View / Edit Cart"):
-        for name, v in st.session_state.cart.items():
+        for name, v in list(st.session_state.cart.items()):
             st.write(f"- {name} x {v['qty']} (${v['item']['price']} each)")
-            col1, col2 = st.columns([1,4])
+            col1, col2 = st.columns([1,3])
             with col1:
                 if st.button("➖", key=f"minus_{name}"):
                     if v["qty"] > 1:
@@ -136,4 +137,5 @@ for item in filtered_items:
     st.write(f"{item['description']}")
     if st.button("Add to Cart", key=f"add_{item['name']}"):
         add_to_cart(item["name"])
+        st.experimental_rerun()  # forces page to refresh and show updated cart
     st.markdown("---")
