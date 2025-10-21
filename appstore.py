@@ -13,24 +13,24 @@ nouns = ["Laptop", "Notebook", "Backpack", "Water Bottle", "Headphones", "Sneake
 
 description_templates = {
     "Electronics": [
-        "High-performance {name} suitable for work, gaming, and daily use. Comes with a sleek design and optimized features to enhance your productivity and entertainment. Ideal for tech enthusiasts who value quality and performance.",
-        "Innovative {name} equipped with cutting-edge technology, providing seamless experience and maximum efficiency. Perfect for professionals and gamers alike.",
-        "Reliable {name} designed to enhance your productivity and entertainment, ensuring durability, speed, and a modern design that fits any lifestyle."
+        "High-performance {name} suitable for work, gaming, and daily use. Comes with a sleek design and optimized features to enhance your productivity and entertainment.",
+        "Innovative {name} equipped with cutting-edge technology, providing seamless experience and maximum efficiency.",
+        "Reliable {name} designed to enhance your productivity and entertainment, ensuring durability, speed, and modern design."
     ],
     "Stationery": [
-        "Perfect for school, office, or creative projects, the {name} ensures smooth writing and long-lasting use. Designed to keep your notes organized and inspire creativity.",
+        "Perfect for school, office, or creative projects, the {name} ensures smooth writing and long-lasting use.",
         "Durable {name} that supports your academic and professional tasks. A must-have for students, teachers, and office workers.",
-        "Essential {name} for all your writing, drawing, and planning needs. Combines practicality with style and efficiency."
+        "Essential {name} for all your writing, drawing, and planning needs. Combines practicality with style."
     ],
     "Accessories": [
-        "Stylish and functional {name} that complements your daily life. Designed with comfort, convenience, and durability in mind, suitable for all occasions.",
-        "High-quality {name} made to last while providing practicality and style. Perfect as a gift or personal accessory.",
+        "Stylish and functional {name} that complements your daily life. Designed with comfort, convenience, and durability in mind.",
+        "High-quality {name} made to last while providing practicality and style.",
         "Durable {name} designed to offer both fashion and utility, adding elegance to your everyday routine."
     ],
     "Clothing": [
-        "Comfortable and trendy {name} ideal for daily wear. Crafted from premium fabrics to ensure durability, style, and comfort throughout the day.",
-        "Premium fabric {name} that combines fashion with practicality, perfect for casual outings or professional environments.",
-        "Perfect {name} to enhance your wardrobe with both style and comfort. Designed to last while keeping you fashionable."
+        "Comfortable and trendy {name} ideal for daily wear. Crafted from premium fabrics to ensure durability, style, and comfort.",
+        "Premium fabric {name} that combines fashion with practicality, perfect for casual or professional environments.",
+        "Perfect {name} to enhance your wardrobe with style and comfort. Designed to last while keeping you fashionable."
     ],
     "Kitchen": [
         "Essential {name} for a seamless cooking experience. Crafted with quality materials, it makes everyday kitchen tasks efficient and enjoyable.",
@@ -80,6 +80,10 @@ def add_to_cart(item):
         st.session_state.cart[item["name"]] = {"item": item, "qty": 1}
     st.success(f"🛒 Added '{item['name']}' to cart!")
 
+def remove_from_cart(name):
+    if name in st.session_state.cart:
+        del st.session_state.cart[name]
+
 def checkout():
     if not st.session_state.cart:
         st.warning("Your cart is empty.")
@@ -97,6 +101,24 @@ if selected_category != "All":
 if search:
     filtered_items = [i for i in filtered_items if search.lower() in i["name"].lower()]
 
+# --- TOP CART SUMMARY ---
+st.subheader("🛒 Cart Summary")
+if st.session_state.cart:
+    total_qty = sum(v["qty"] for v in st.session_state.cart.values())
+    total_price = sum(v["item"]["price"] * v["qty"] for v in st.session_state.cart.values())
+    st.write(f"Items in cart: **{total_qty}**  |  Total: **${total_price:.2f}**")
+    with st.expander("View / Edit Cart"):
+        for name, v in st.session_state.cart.items():
+            st.write(f"- {name} x {v['qty']} (${v['item']['price']} each)")
+            if st.button(f"Remove {name}", key=f"remove_{name}"):
+                remove_from_cart(name)
+        if st.button("Checkout"):
+            checkout()
+else:
+    st.info("Cart is empty.")
+
+st.markdown("---")
+
 # --- DISPLAY ITEMS AS LIST ---
 st.subheader("🛍️ Browse Items")
 for item in filtered_items:
@@ -106,15 +128,3 @@ for item in filtered_items:
     if st.button("Add to Cart", key=f"{item['name']}"):
         add_to_cart(item)
     st.markdown("---")
-
-# --- SIDEBAR CART ---
-st.sidebar.subheader("🛒 Your Cart")
-if st.session_state.cart:
-    total = sum(v["item"]["price"] * v["qty"] for v in st.session_state.cart.values())
-    for v in st.session_state.cart.values():
-        st.sidebar.write(f"- {v['item']['name']} x {v['qty']} (${v['item']['price']} each)")
-    st.sidebar.write(f"**Total: ${total:.2f}**")
-    if st.sidebar.button("Checkout"):
-        checkout()
-else:
-    st.sidebar.info("Cart is empty.")
