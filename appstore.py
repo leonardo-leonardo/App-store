@@ -129,13 +129,15 @@ else:
 
 st.markdown("---")
 
-# --- DISPLAY ITEMS AS LIST ---
+# --- DISPLAY ITEMS AS LIST USING FORMS (FIXES FIRST BUTTON ISSUE) ---
 st.subheader("🛍️ Browse Items")
-for item in filtered_items:
-    st.markdown(f"### {item['name']}")
-    st.write(f"**Category:** {item['category']}  |  **Price:** ${item['price']}")
-    st.write(f"{item['description']}")
-    if st.button("Add to Cart", key=f"add_{item['name']}"):
-        add_to_cart(item["name"])
-        st.experimental_rerun()  # forces page to refresh and show updated cart
-    st.markdown("---")
+for idx, item in enumerate(filtered_items):
+    with st.form(key=f"form_{idx}"):
+        st.markdown(f"### {item['name']}")
+        st.write(f"**Category:** {item['category']}  |  **Price:** ${item['price']}")
+        st.write(f"{item['description']}")
+        submitted = st.form_submit_button("Add to Cart")
+        if submitted:
+            add_to_cart(item["name"])
+            st.experimental_rerun()  # refresh page to update cart
+        st.markdown("---")
