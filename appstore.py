@@ -73,23 +73,24 @@ while len(common_items) < 100:
 if "cart" not in st.session_state:
     st.session_state.cart = {}
 
-def add_to_cart(item):
-    if item["name"] in st.session_state.cart:
-        st.session_state.cart[item["name"]]["qty"] += 1
+def add_to_cart(name):
+    if name in st.session_state.cart:
+        st.session_state.cart[name]["qty"] += 1
     else:
-        st.session_state.cart[item["name"]] = {"item": item, "qty": 1}
-    st.success(f"🛒 Added '{item['name']}' to cart!")
+        item = next((i for i in common_items if i["name"] == name), None)
+        if item:
+            st.session_state.cart[name] = {"item": item, "qty": 1}
 
 def remove_from_cart(name):
     if name in st.session_state.cart:
         del st.session_state.cart[name]
 
 def checkout():
-    if not st.session_state.cart:
-        st.warning("Your cart is empty.")
-    else:
+    if st.session_state.cart:
         st.success("✅ Checkout complete!")
         st.session_state.cart.clear()
+    else:
+        st.warning("Cart is empty!")
 
 # --- SEARCH & CATEGORY FILTER ---
 search = st.text_input("🔍 Search items", "")
@@ -110,8 +111,16 @@ if st.session_state.cart:
     with st.expander("View / Edit Cart"):
         for name, v in st.session_state.cart.items():
             st.write(f"- {name} x {v['qty']} (${v['item']['price']} each)")
-            if st.button(f"Remove {name}", key=f"remove_{name}"):
-                remove_from_cart(name)
+            col1, col2 = st.columns([1,4])
+            with col1:
+                if st.button("➖", key=f"minus_{name}"):
+                    if v["qty"] > 1:
+                        st.session_state.cart[name]["qty"] -= 1
+                    else:
+                        remove_from_cart(name)
+            with col2:
+                if st.button("❌ Remove", key=f"remove_{name}"):
+                    remove_from_cart(name)
         if st.button("Checkout"):
             checkout()
 else:
@@ -125,6 +134,6 @@ for item in filtered_items:
     st.markdown(f"### {item['name']}")
     st.write(f"**Category:** {item['category']}  |  **Price:** ${item['price']}")
     st.write(f"{item['description']}")
-    if st.button("Add to Cart", key=f"{item['name']}"):
-        add_to_cart(item)
+    if st.button("Add to Cart", key=f"add_{item['name']}"):
+        add_to_cart(item["name"])
     st.markdown("---")
